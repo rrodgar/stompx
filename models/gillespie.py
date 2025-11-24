@@ -197,7 +197,7 @@ class Gillespie_SIR_Network():
 
             
 
-    def run_simulation(self, tmax, verbose = True):
+    def run_simulation(self, tmax, verbose = False):
         # Hacemos la simulacion del algortimo de GIllespie para el grafo
         self.initialize_network()
         t = 0
