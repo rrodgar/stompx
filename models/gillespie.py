@@ -204,8 +204,7 @@ class Gillespie_SIR_Network():
         Parameters
         ----------
         tmax : float
-            Maximum simulation time. The algorithm stops once the internal 
-            simulation clock `t` exceeds this value.
+            Maximum simulation time.
         verbose : bool, optional
             If True, print intermediate messages about the simulation status,
             including early termination due to disappearance of susceptible 
