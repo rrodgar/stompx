@@ -198,31 +198,39 @@ class Gillespie_SIR_Network():
             
 
     def run_simulation(self, tmax, verbose = False):
-        # Hacemos la simulacion del algortimo de GIllespie para el grafo
+        """
+        Run an exact stochastic simulation of the Gillespie algorithm
+
+        Parameters
+        ----------
+        tmax : float
+            Maximum simulation time. The algorithm stops once the internal 
+            simulation clock `t` exceeds this value.
+        verbose : bool, optional
+            If True, print intermediate messages about the simulation status,
+            including early termination due to disappearance of susceptible 
+            or infected nodes.
+        """
         self.initialize_network()
         t = 0
         eventos = 0
         self.time = [t]
-        self.historial_red = [] # Lista vacia para almacenar state de cada nodo en un paso de tiempo
-        self.historial_red.append([self.G.nodes[nodo]['state'] for nodo in self.G.nodes()]) # Se guarda el primer state
+        self.historial_red = [] 
+        self.historial_red.append([self.G.nodes[nodo]['state'] for nodo in self.G.nodes()]) 
         while (t < tmax):
-       # Se calculan los diferentes ratios de prob llamando al método
             self.Prob_rates()
             if self.w_i[-1] == 0:
                 if verbose:
                     print(f"El número de susceptibles e infectados es nulo. Simulación finalizada en t = {self.time[-1]}")
                 break
 
-            # Generamos numero aleatorio y calculamos incremento temporal mediante dist. Exp:
             r = np.random.rand()
             dt = -1/self.w_i[-1] * np.log(r)
             t += dt
 
-            #Elegimos que suceso ocurre:
             self.choose_reaction()
             eventos +=1
 
-            # Guardamos tiempo y los valores de los nodos
             self.time.append(t)
             self.historial_red.append([self.G.nodes[nodo]['state'] for nodo in self.G.nodes()])
         
