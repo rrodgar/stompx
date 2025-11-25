@@ -213,7 +213,7 @@ class Gillespie_SIR_Network():
         """
         self.initialize_network()
         t = 0
-        eventos = 0
+        events = 0
         self.time = [t]
         self.network_history = [] 
         self.network_history.append([self.G.nodes[node]['state'] for node in self.G.nodes()]) 
@@ -229,7 +229,7 @@ class Gillespie_SIR_Network():
             t += dt
 
             self.choose_reaction()
-            eventos +=1
+            events +=1
 
             self.time.append(t)
             self.network_history.append([self.G.nodes[node]['state'] for node in self.G.nodes()])
