@@ -63,17 +63,17 @@ class Gillespie_SIR_Network():
         
         if self.initial_inf_method == 'eigenvector':
             centralidad = nx.eigenvector_centrality_numpy(self.G)
-            nodo_inicio = max(centralidad, key=centralidad.get)
-            self.G.nodes[nodo_inicio]['state'] = 'I'
+            node_inicio = max(centralidad, key=centralidad.get)
+            self.G.nodes[node_inicio]['state'] = 'I'
 
         elif self.initial_inf_method == 'degree':
             centralidad = nx.degree_centrality(self.G)
-            nodo_inicio = max(centralidad, key = centralidad.get)
-            self.G.nodes[nodo_inicio]['state'] = 'I'
+            node_inicio = max(centralidad, key = centralidad.get)
+            self.G.nodes[node_inicio]['state'] = 'I'
 
         else:
-            for nodo in random.sample(list(self.G.nodes), k= self.num_initial_infected):
-                self.G.nodes[nodo]['state'] ='I'
+            for node in random.sample(list(self.G.nodes), k= self.num_initial_infected):
+                self.G.nodes[node]['state'] ='I'
 
         self.initialize_SI_edges()
 
@@ -128,7 +128,7 @@ class Gillespie_SIR_Network():
             raise ValueError(f"Edge {edge} does not connect a susceptible and an infected node.")
 
 
-    def remove_edges_SI(self,nodo):
+    def remove_edges_SI(self,node):
         """
         Remove all S–I edges incident to a given node.
 
@@ -142,12 +142,12 @@ class Gillespie_SIR_Network():
         This is used when a node changes state (e.g., S→I or I→R).
         """
         to_remove = set()
-        for neighbor in self.G.neighbors(nodo):
-            par = tuple(sorted((nodo, neighbor)))
+        for neighbor in self.G.neighbors(node):
+            par = tuple(sorted((node, neighbor)))
             if par in self.E_SI:
                 to_remove.add(par)
         self.E_SI.difference_update(to_remove)
-    def add_edges_SI(self,nodo):
+    def add_edges_SI(self,node):
         """
         Add all new S-I edges created after a node becomes infected.
 
@@ -156,9 +156,9 @@ class Gillespie_SIR_Network():
         node : int
             Newly infected node
         """
-        for neighbor in self.G.neighbors(nodo):
+        for neighbor in self.G.neighbors(node):
             if self.G.nodes[neighbor]['state'] == 'S':
-                par = tuple(sorted((nodo, neighbor)))
+                par = tuple(sorted((node, neighbor)))
                 self.E_SI.add(par)
         
     def Prob_rates(self):
@@ -215,13 +215,13 @@ class Gillespie_SIR_Network():
         t = 0
         eventos = 0
         self.time = [t]
-        self.historial_red = [] 
-        self.historial_red.append([self.G.nodes[nodo]['state'] for nodo in self.G.nodes()]) 
+        self.network_history = [] 
+        self.network_history.append([self.G.nodes[node]['state'] for node in self.G.nodes()]) 
         while (t < tmax):
             self.Prob_rates()
             if self.w_i[-1] == 0:
                 if verbose:
-                    print(f"El número de susceptibles e infectados es nulo. Simulación finalizada en t = {self.time[-1]}")
+                    print(f"No susceptible or infected nodes remain. "f"Simulation ended at t = {self.time[-1]}")
                 break
 
             r = np.random.rand()
@@ -232,7 +232,7 @@ class Gillespie_SIR_Network():
             eventos +=1
 
             self.time.append(t)
-            self.historial_red.append([self.G.nodes[nodo]['state'] for nodo in self.G.nodes()])
+            self.network_history.append([self.G.nodes[node]['state'] for node in self.G.nodes()])
         
         if verbose:
-            print('Han ocurrido ', eventos ,'eventos')
+            print('Number of events:', events)
