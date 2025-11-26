@@ -206,9 +206,7 @@ class Gillespie_SIR_Network():
         tmax : float
             Maximum simulation time.
         verbose : bool, optional
-            If True, print intermediate messages about the simulation status,
-            including early termination due to disappearance of susceptible 
-            or infected nodes.
+            If True, print intermediate messages about the simulation status.
         """
         self.initialize_network()
         t = 0

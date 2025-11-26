@@ -1,3 +1,6 @@
+#Import dependencies
+import matplotlib as plt
+
 def plot_curva_infectados(simulacion, gillespie = True):
     """
         Plot the temporal evolution of infected nodes from a simulation.
