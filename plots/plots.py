@@ -1,5 +1,6 @@
 #Import dependencies
 import matplotlib as plt
+import numpy as np
 
 def plot_curva_infectados(simulacion, gillespie = True):
     """
@@ -9,11 +10,43 @@ def plot_curva_infectados(simulacion, gillespie = True):
     infectados_por_tiempo = [snapshot.count('I') for snapshot in hist]
     plt.plot(simulacion.time,infectados_por_tiempo, label='Infectados')
     if gillespie:
-        plt.xlabel('t')
+        plt.xlabel('time')
     else:
-        plt.xlabel('pMC')
+        plt.xlabel('MC_step')
     plt.ylabel('I')
-    plt.title('Evolución de infectados')
+    plt.title('Infecte')
     plt.legend()
     plt.grid(True)
+    plt.show()
+
+def plot_barras(simulacion, salto=1, gillespie= True):
+    # Obtener el recuento de cada estado en cada paso de tiempo
+    recuento_estados = {'S': [], 'I': [], 'R': []}
+    for estado_paso in simulacion.historial_red:
+        recuento_estados['S'].append(estado_paso.count('S'))
+        recuento_estados['I'].append(estado_paso.count('I'))
+        recuento_estados['R'].append(estado_paso.count('R'))
+
+    # Submuestreo cada 'salto' pasos
+    idxs = list(range(0, len(simulacion.time), salto))
+    S_vals = [recuento_estados['S'][i] for i in idxs]
+    I_vals = [recuento_estados['I'][i] for i in idxs]
+    R_vals = [recuento_estados['R'][i] for i in idxs]
+
+    # Crear el gráfico de barras con los valores reducidos
+    plt.figure(figsize=(15, 6))
+    plt.bar(range(len(S_vals)), S_vals, color='blue', label='S')
+    plt.bar(range(len(I_vals)), I_vals, color='red', bottom=S_vals, label='I')
+    plt.bar(range(len(R_vals)), R_vals, color='green', bottom=np.array(S_vals) + np.array(I_vals), label='R')
+
+    plt.xticks(range(0, len(S_vals), max(1, len(S_vals)//10)), labels=[str(idxs[i]) for i in range(0, len(idxs), max(1, len(idxs)//10))])
+    # plt.xlabel('Evento (muestreo cada {} eventos)'.format(salto))
+    if gillespie:
+        plt.xlabel('Evento')
+    else:
+        plt.xlabel('pMC')
+    plt.ylabel('# de nodos')
+    plt.title('Evolución de estados en la red IoT (modelo SIR)')
+    plt.legend()
+    plt.tight_layout()
     plt.show()
