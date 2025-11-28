@@ -31,7 +31,7 @@ def plot_infected_curve(simulation, gillespie = True):
     plt.grid(True)
     plt.show()
 
-def plot_barras(simulation, salto=1, gillespie= True):
+def plot_barras(simulation, steps=1, gillespie= True):
     # Obtener el recuento de cada estado en cada paso de tiempo
     recuento_estados = {'S': [], 'I': [], 'R': []}
     for estado_paso in simulation.historial_red:
@@ -39,8 +39,8 @@ def plot_barras(simulation, salto=1, gillespie= True):
         recuento_estados['I'].append(estado_paso.count('I'))
         recuento_estados['R'].append(estado_paso.count('R'))
 
-    # Submuestreo cada 'salto' pasos
-    idxs = list(range(0, len(simulation.time), salto))
+    # Submuestreo cada 'steps' pasos
+    idxs = list(range(0, len(simulation.time), steps))
     S_vals = [recuento_estados['S'][i] for i in idxs]
     I_vals = [recuento_estados['I'][i] for i in idxs]
     R_vals = [recuento_estados['R'][i] for i in idxs]
@@ -52,7 +52,7 @@ def plot_barras(simulation, salto=1, gillespie= True):
     plt.bar(range(len(R_vals)), R_vals, color='green', bottom=np.array(S_vals) + np.array(I_vals), label='R')
 
     plt.xticks(range(0, len(S_vals), max(1, len(S_vals)//10)), labels=[str(idxs[i]) for i in range(0, len(idxs), max(1, len(idxs)//10))])
-    # plt.xlabel('Evento (muestreo cada {} eventos)'.format(salto))
+    # plt.xlabel('Evento (muestreo cada {} eventos)'.format(steps))
     if gillespie:
         plt.xlabel('Evento')
     else:
