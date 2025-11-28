@@ -2,33 +2,45 @@
 import matplotlib as plt
 import numpy as np
 
-def plot_curva_infectados(simulacion, gillespie = True):
+def plot_infected_curve(simulation, gillespie = True):
     """
         Plot the temporal evolution of infected nodes from a simulation.
+
+        Parameters
+        ----------
+        simulation : object
+            A simulation object containing the attributes:
+
+            * network_snapshots : list of lists with the state of each node.
+            * time : list of time points at which events occurred.
+
+        gillespie : bool, optional
+            If True, the x-axis is labeled as continuous time 't' (Gillespie SSA).
+            If False, the x-axis is treated as discrete Monte Carlo steps.
     """
-    hist = simulacion.historial_red
-    infectados_por_tiempo = [snapshot.count('I') for snapshot in hist]
-    plt.plot(simulacion.time,infectados_por_tiempo, label='Infectados')
+    snapshots = simulation.network_history
+    infected_counts_time_step = [snapshot.count('I') for snapshot in snapshots]
+    plt.plot(simulation.time, infected_counts_time_step, label='Infected')
     if gillespie:
         plt.xlabel('time')
     else:
         plt.xlabel('MC_step')
     plt.ylabel('I')
-    plt.title('Infecte')
+    plt.title('Temporal evolution of infected nodes')
     plt.legend()
     plt.grid(True)
     plt.show()
 
-def plot_barras(simulacion, salto=1, gillespie= True):
+def plot_barras(simulation, salto=1, gillespie= True):
     # Obtener el recuento de cada estado en cada paso de tiempo
     recuento_estados = {'S': [], 'I': [], 'R': []}
-    for estado_paso in simulacion.historial_red:
+    for estado_paso in simulation.historial_red:
         recuento_estados['S'].append(estado_paso.count('S'))
         recuento_estados['I'].append(estado_paso.count('I'))
         recuento_estados['R'].append(estado_paso.count('R'))
 
     # Submuestreo cada 'salto' pasos
-    idxs = list(range(0, len(simulacion.time), salto))
+    idxs = list(range(0, len(simulation.time), salto))
     S_vals = [recuento_estados['S'][i] for i in idxs]
     I_vals = [recuento_estados['I'][i] for i in idxs]
     R_vals = [recuento_estados['R'][i] for i in idxs]
