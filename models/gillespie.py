@@ -31,7 +31,7 @@ class Gillespie_SIR_Network():
         self.num_initial_infected = num_initial_infected
         self.initial_inf_method = initial_inf_method
 
-    def can_be_infection(self, edge):
+    def can_be_infection(self, edge:tuple[int,int]):
         """
         Check whether an edge is a susceptible-infected (S-I) contact.
 
