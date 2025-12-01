@@ -34,7 +34,7 @@ def plot_infected_curve(simulation, gillespie = True):
 def plot_barras(simulation, steps=1, gillespie= True):
     # Obtener el recuento de cada estado en cada paso de tiempo
     recuento_estados = {'S': [], 'I': [], 'R': []}
-    for estado_paso in simulation.historial_red:
+    for estado_paso in simulation.network_history:
         recuento_estados['S'].append(estado_paso.count('S'))
         recuento_estados['I'].append(estado_paso.count('I'))
         recuento_estados['R'].append(estado_paso.count('R'))
