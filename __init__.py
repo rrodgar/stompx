@@ -3,9 +3,9 @@ from .utils import *
 from .metrics import *
 from .plots import *
 
-__all__ = {
+__all__ = (
     "Gillespie_SIR_Network",
     "plot_infected_curve",
     "crear_dataset",
     "I_max_mean",
-}
+)

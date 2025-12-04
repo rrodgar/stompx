@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stompx"
+version = "0.0.1"
+description = "Stochastic malware propagation models and tools"
+authors = [
+    { name = "Rafael Rodríguez", email = "tu_email@ejemplo.com" }
+]
+readme = "README.md"
+requires-python = ">=3.9"
+
+dependencies = [
+    "numpy",
+    "networkx",
+    "matplotlib"
+]
+
+[project.urls]
+Homepage = "https://github.com/rafael/stompx"
+Repository = "https://github.com/rafael/stompx"
+
+# --- Lo importante para que setuptools encuentre tu paquete ---
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["stompx*"]
