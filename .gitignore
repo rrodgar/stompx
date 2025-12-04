@@ -1,0 +1,5 @@
+# Ignore test notebook
+pruebas.ipynb
+
+# Vscode
+*.vscode
