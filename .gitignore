@@ -3,3 +3,11 @@ pruebas.ipynb
 
 # Vscode
 *.vscode
+build/
+develop-eggs/
+dist/
+downloads/
+*.egg
+*.egg-info/
+.eggs/
+eggs/
