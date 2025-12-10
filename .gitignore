@@ -12,3 +12,4 @@ downloads/
 .eggs/
 eggs/
 __pycache__/
+*.pyc
