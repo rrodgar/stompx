@@ -154,24 +154,26 @@ def plot_network_evolution(simulation, network, steps):
     for fig in figures:
         fig.show()
 
-def plot_animacion(simulation:object, network:object)->None:
+def plot_animation(simulation:object, network:object)->None:
     """_summary_
 
     Parameters
     ----------
     simulation : object
-        _description_
-    network : object
-        _description_
+        Simulation object containing:
+        - network_history : list of lists with states ('S', 'I', 'R') for each node.
+        - time : list of event times or discrete steps.
+    network : networkx.Graph
+        The underlying network whose structure (nodes and edges) will be plotted.
     """
 
-    # layout fijo para que los nodes no "salten"
+    
     fixed_layout = nx.spring_layout(network, seed=42)
 
-    # diccionario de colores
+   
     state_colors = {'S': 'blue', 'I': 'red', 'R': 'green'}
 
-    # crear los frames para cada paso temporal
+    
     frames = []
     for i, snapshot in enumerate(simulation.network_history):
         node_traces = go.Scatter(
@@ -197,7 +199,7 @@ def plot_animacion(simulation:object, network:object)->None:
 
         frames.append(go.Frame(data=edge_traces + [node_traces], name=str(i)))
 
-    # figura inicial (primer paso)
+    
     fig = go.Figure(
         data=frames[0].data,
         layout=go.Layout(
