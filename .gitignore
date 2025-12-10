@@ -11,3 +11,4 @@ downloads/
 *.egg-info/
 .eggs/
 eggs/
+__pycache__/
