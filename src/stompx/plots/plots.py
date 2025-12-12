@@ -203,7 +203,7 @@ def plot_animation(simulation:object, network:object)->None:
     fig = go.Figure(
         data=frames[0].data,
         layout=go.Layout(
-        title=f"Stochastic-Network SIR — β = {simulation.beta}, γ = {simulation.gamma}, nI(t0)= {simulation.num_inf_ini}",
+        title=f"Stochastic-Network SIR — β = {simulation.beta}, γ = {simulation.gamma}, nI(t0)= {simulation.num_initial_infected}",
             updatemenus=[dict(
                 type='buttons',
                 showactive=False,

@@ -8,4 +8,6 @@ __all__ = (
     "plot_infected_curve",
     "crear_dataset",
     "I_max_mean",
+    "plot_animation",
+    "plot_evolution_network",
 )
