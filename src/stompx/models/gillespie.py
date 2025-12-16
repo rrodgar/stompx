@@ -216,7 +216,7 @@ class Gillespie_SIR_Network():
         self.network_history.append([self.G.nodes[node]['state'] for node in self.G.nodes()]) 
         while (t < tmax):
             self.Prob_rates()
-            if self.w_i[-1] == 0:
+            if self.w_i[-1] < 0.0001:
                 if verbose:
                     print(f"No susceptible or infected nodes remain. "f"Simulation ended at t = {self.time[-1]}")
                 break
@@ -233,3 +233,106 @@ class Gillespie_SIR_Network():
         
         if verbose:
             print('Number of events:', events)
+
+class Gillespie_SIR_Network_TOM(Gillespie_SIR_Network):
+
+    def TOM(self,node_i:int,node_j:int)->float:
+        """ Compute the topological overlap measure for two nodes
+
+        Parameters
+        ----------
+        node_i : int
+            Node number 'i' in the networkx graph G
+        node_j : int
+            Node number 'j' in the networkx graph G
+
+        Returns
+        -------
+        float
+            TOM value for nodes i and j
+        """
+        
+        neighbors_i = set(self.G.neighbors(node_i))
+        neighbors_j = set(self.G.neighbors(node_j))
+        l_ij = len(neighbors_i & neighbors_j)
+        k_i = self.G.degree(node_i)
+        k_j = self.G.degree(node_j)
+        tom = (l_ij + 1) / (min(k_i, k_j))
+        return tom 
+    def compute_TOM_vector(self):
+        """
+        Compute the TOM values for all pair of nodes in the set E_SI (all the Susceptible-Infected pairs)
+        """
+        self.TOM_weights = [self.TOM(u,v) for (u,v) in self.E_SI]
+
+    def compute_cumulative_TOM(self):
+        """
+        Compute the cumulative TOM weight over the SI edge set.
+
+        Returns
+        -------
+        float
+            cumulative TOM weight over the SI edge set.
+        """
+        self.compute_TOM_vector()
+        self.TOM_cumulative = sum(self.TOM_weights)
+        return self.TOM_cumulative
+    def Prob_rates(self):
+        """
+        Compute the infection and recovery propensities for the Gillespie algorithm
+        """
+        self.recovery_rate = self.gamma * self.nI
+        self.infection_rate = self.beta * (len(self.E_SI) + self.TOM_cumulative)
+        self.a_i = np.array([self.recovery_rate, self.infection_rate])
+        self.w_i = np.cumsum(self.a_i) 
+
+    def initialize_network(self):
+        """
+        Set all nodes to Susceptible and infect some initial nodes according
+        to the chosen initialization strategy 
+        """
+        super().initialize_network()
+        #Initialize TOM cumulative value from TOM vector. Next values are calculated iteratively
+        self.compute_cumulative_TOM()
+
+    def remove_edges_SI(self,node):
+        """
+        Remove all S–I edges incident to a given node.
+
+        Parameters
+        ----------
+        node : int
+            Node whose incident S–I edges will be removed.
+
+        Notes
+        -----
+        This is used when a node changes state (e.g., S→I or I→R).
+        """
+        to_remove = set()
+        for neighbor in self.G.neighbors(node):
+            par = tuple(sorted((node, neighbor)))
+            if par in self.E_SI:
+                to_remove.add(par)
+                #Update cumulative TOM
+                self.TOM_cumulative -= self.TOM(node,neighbor)
+                self.TOM_cumulative = max(0,self.TOM_cumulative) # Control sequence, TOM must be positive or 0
+        self.E_SI.difference_update(to_remove)
+    def add_edges_SI(self,node):
+        """
+        Add all new S-I edges created after a node becomes infected.
+
+        Parameters
+        ----------
+        node : int
+            Newly infected node
+        """
+        for neighbor in self.G.neighbors(node):
+            if self.G.nodes[neighbor]['state'] == 'S':
+                par = tuple(sorted((node, neighbor)))
+                self.E_SI.add(par)
+                self.TOM_cumulative += self.TOM(node,neighbor) #Update cumulative TOM
+    
+    
+class gillespie_prueba():
+    def __init__(self):
+        pass
