@@ -264,21 +264,21 @@ def plot_hist_I_max(model,n_sim=100, steps = 50, tmax = 100 ,gillespie = True):
     #iteraciones
     for i in range(n_sim):
         if gillespie:
-            modelo.run_simulation(tmax, verbose = False )
+            model.run_simulation(tmax, verbose = False )
         else:
-            modelo.run_simulation(steps)
-        I = [state.count('I') for state in modelo.network_history]
+            model.run_simulation(steps)
+        I = [state.count('I') for state in model.network_history]
         I_max = max(I)
         I_max_list.append(I_max)
-        tf = modelo.time[np.where(np.array(I) > 0)[0][-1]] 
+        tf = model.time[np.where(np.array(I) > 0)[0][-1]] 
         sum_tf += tf
         if I_max < 10:
             extinction_count +=1
         
     I_max_list = np.array(I_max_list)
-    media_I_max = I_max_list.mean()
+    mean_I_max = I_max_list.mean()
     std_I_max = I_max_list.std()
-    media_tf = sum_tf/n_sim
+    mean_duration = sum_tf/n_sim
     # Histograma
     # plt.hist(I_max_list, bins=30, alpha=0.7, color='red', edgecolor = 'black')
     plt.hist(I_max_list, bins=range(min(I_max_list), max(I_max_list)+1), color = 'skyblue', edgecolor='black')
@@ -293,25 +293,25 @@ def plot_hist_I_max(model,n_sim=100, steps = 50, tmax = 100 ,gillespie = True):
     print(f"Mean duration until last infection: {mean_duration:.2f}")
     print(f"Number of simulations that went extinct early: {extinction_count}")
 
-def plot_hist_tf(modelo, nombre='Modelo', n_sim=100, steps=50, tmax=100, gillespie=True):
+def plot_hist_tf(model, nombre='model', n_sim=100, steps=50, tmax=100, gillespie=True):
     tf_vec = []
 
     for i in range(n_sim):
         if gillespie:
-            modelo.run_simulation(tmax, verbose=False)
+            model.run_simulation(tmax, verbose=False)
         else:
-            modelo.run_simulation(steps)
+            model.run_simulation(steps)
 
         # Recuento de infectados a lo largo del tiempo
-        I = [state.count('I') for state in modelo.network_history]
+        I = [state.count('I') for state in model.network_history]
 
         # Si hubo algún infectado en la simulación, obtenemos el último tiempo con I > 0
         if any(I):
-            tf = modelo.time[np.where(np.array(I) > 0)[0][-1]]
+            tf = model.time[np.where(np.array(I) > 0)[0][-1]]
             tf_vec.append(tf)
 
     tf_vec = np.array(tf_vec)
-    media_tf = tf_vec.mean()
+    mean_duration = tf_vec.mean()
     std_tf = tf_vec.std()
 
     # Histograma
@@ -323,5 +323,5 @@ def plot_hist_tf(modelo, nombre='Modelo', n_sim=100, steps=50, tmax=100, gillesp
     plt.tight_layout()
     plt.show()
 
-    print(f" — t_fin medio: {media_tf:.2f} ± {std_tf:.2f}")
+    print(f" — t_fin medio: {mean_duration:.2f} ± {std_tf:.2f}")
     return tf_vec

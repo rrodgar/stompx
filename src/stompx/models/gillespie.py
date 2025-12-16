@@ -331,8 +331,3 @@ class Gillespie_SIR_Network_TOM(Gillespie_SIR_Network):
                 par = tuple(sorted((node, neighbor)))
                 self.E_SI.add(par)
                 self.TOM_cumulative += self.TOM(node,neighbor) #Update cumulative TOM
-    
-    
-class gillespie_prueba():
-    def __init__(self):
-        pass
