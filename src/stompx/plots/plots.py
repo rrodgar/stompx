@@ -252,11 +252,6 @@ def plot_hist_I_max(model,n_sim=100, steps = 50, tmax = 100 ,gillespie = True):
         Maximum time for Gillespie simulation, by default 100.
     gillespie : bool, optional
         If True, uses Gillespie SSA time; otherwise uses discrete steps, by default True.
-
-    Returns
-    -------
-    _type_
-        _description_
     """
     sum_tf = 0
     I_max_list = []
@@ -293,7 +288,25 @@ def plot_hist_I_max(model,n_sim=100, steps = 50, tmax = 100 ,gillespie = True):
     print(f"Mean duration until last infection: {mean_duration:.2f}")
     print(f"Number of simulations that went extinct early: {extinction_count}")
 
-def plot_hist_tf(model, nombre='model', n_sim=100, steps=50, tmax=100, gillespie=True):
+def plot_hist_tf(model, n_sim=100, steps=50, tmax=100, gillespie=True):
+    """
+    Plot histogram of the outbreak duration (time until no infected nodes remain).
+
+    Parameters
+    ----------
+    model : object
+        Model object containing:
+        - network_history : list of lists with states ('S', 'I', 'R') for each node.
+        - time : list of event times or discrete steps.
+    n_sim : int, optional
+        Number of simulations to run, by default 100.
+    steps : int, optional
+        Number of discrete Monte Carlo steps (if not using Gillespie), by default 50.
+    tmax : int, optional
+        Maximum time for Gillespie simulation, by default 100.
+    gillespie : bool, optional
+        If True, uses Gillespie SSA time; otherwise uses discrete steps, by default True.
+    """
     tf_vec = []
 
     for i in range(n_sim):
@@ -302,10 +315,10 @@ def plot_hist_tf(model, nombre='model', n_sim=100, steps=50, tmax=100, gillespie
         else:
             model.run_simulation(steps)
 
-        # Recuento de infectados a lo largo del tiempo
+        
         I = [state.count('I') for state in model.network_history]
 
-        # Si hubo algún infectado en la simulación, obtenemos el último tiempo con I > 0
+        # Only consider simulations where infection occurred.
         if any(I):
             tf = model.time[np.where(np.array(I) > 0)[0][-1]]
             tf_vec.append(tf)
@@ -314,14 +327,14 @@ def plot_hist_tf(model, nombre='model', n_sim=100, steps=50, tmax=100, gillespie
     mean_duration = tf_vec.mean()
     std_tf = tf_vec.std()
 
-    # Histograma
+    
     plt.hist(tf_vec, bins=30, color = 'skyblue', edgecolor='black')
-    plt.xlabel('Tiempo hasta la extinción del brote ($t_{\\text{fin}}$)')
-    plt.ylabel('Frecuencia')
-    plt.title(f'Distribución de $t_{{\\text{{fin}}}}$ ({nombre})')
-    plt.grid(True)
+    plt.xlabel('Time until outbreak extinction ($t_{fin}$)')
+    plt.ylabel('Frequency')
+    plt.title('Distribution of outbreak duration')
     plt.tight_layout()
     plt.show()
 
-    print(f" — t_fin medio: {mean_duration:.2f} ± {std_tf:.2f}")
-    return tf_vec
+    print(f"Mean outbreak duration: {mean_duration:.2f} ± {std_tf:.2f}")
+
+    #return tf_vec
