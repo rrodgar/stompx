@@ -13,3 +13,4 @@ downloads/
 eggs/
 __pycache__/
 *.pyc
+*.code-workspace
