@@ -91,7 +91,7 @@ def plot_network_evolution(model, network, steps):
     ----------
     model : object
         model object containing:
-        - network_history : list of lists with states ('S', 'I', 'R') for each node.
+        - network_history : list   of lists with states ('S', 'I', 'R') for each node.
         - time : list of event times or discrete steps.
     network : networkx.Graph
         The underlying network whose structure (nodes and edges) will be plotted.
