@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import plotly.graph_objects as go
 import numpy as np
+from ._helpers import plots_input_validation
 
 def plot_infected_curve(model:object, gillespie = True):
     """
@@ -33,50 +34,55 @@ def plot_infected_curve(model:object, gillespie = True):
     plt.grid(True)
     plt.show()
 
-def plot_bars(model, steps=1, gillespie= True):
-    """_summary_
+def plot_bars(model= None, snapshots = None, time = None , steps=1, state_colors= None,gillespie= True):
+    """
+    Plot a stacked bar chart showing the temporal evolution of node states.
 
     Parameters
     ----------
-    model : object
-        model object containing:
-        - network_history : list of lists with states ('S', 'I', 'R') for each node.
+    model : object, optional
+        Model object containing:
+        - network_history : list of lists with node states
         - time : list of event times or discrete steps.
+        If provided, snapshots and time are extracted from the model.
+    snapshots : list of lists, optional
+        List of node-state snapshots (used if model is None).
+    time : list, optional
+        Time points corresponding to snapshots (used if model is None).
     steps : int, optional
-        Subsampling interval, by default 1
+        Subsampling interval applied to snapshots and time, by default 1.
+    state_colors : dict, optional
+        Mapping from states to colors. Keys define which states are plotted.
+        If None, a default SIR color mapping is used.
     gillespie : bool, optional
-        If True, the x-axis is labeled as continuous time 't' (Gillespie SSA).
-        If False, the x-axis is treated as discrete Monte Carlo steps, 
-        by default True
+        If True, the x-axis is labeled as continuous time.
+        If False, the x-axis is labeled as discrete Monte Carlo steps.
     """
-
-    
-    state_counts = {'S': [], 'I': [], 'R': []}
-    for state_list in model.network_history:
-        state_counts['S'].append(state_list.count('S'))
-        state_counts['I'].append(state_list.count('I'))
-        state_counts['R'].append(state_list.count('R'))
-
-    
-    idxs = list(range(0, len(model.time), steps))
-    S_vals = [state_counts['S'][i] for i in idxs]
-    I_vals = [state_counts['I'][i] for i in idxs]
-    R_vals = [state_counts['R'][i] for i in idxs]
-
-    
+    # --- Input validation ---
+    snapshots, time, state_colors = plots_input_validation(
+        model = model,
+        snapshots= snapshots,
+        time = time,
+        steps=steps,
+        state_colors=state_colors
+    )
+        
+    state_counts={state:[] for state in state_colors.keys()}
+    #Count different states in each valid snapshot
+    for snapshot in snapshots:
+        for state in state_colors.keys():
+            state_counts[state].append(snapshot.count(state))
+     #Figure creation       
     plt.figure(figsize=(15, 6))
-    plt.bar(range(len(S_vals)), S_vals, color='blue', label='S')
-    plt.bar(range(len(I_vals)), I_vals, color='red', bottom=S_vals, label='I')
-    plt.bar(range(len(R_vals)), R_vals, color='green', bottom=np.array(S_vals) + np.array(I_vals), label='R')
-
-    plt.xticks(range(0, len(S_vals), max(1, len(S_vals)//10)), labels=[str(idxs[i]) for i in range(0, len(idxs), max(1, len(idxs)//10))])
+    x = range(len(time))
+    bottom = np.zeros(len(time))
+    for state, color in state_colors.items():
+        plt.bar(x, state_counts[state], color=color, bottom=bottom, label=state)
+        bottom += np.array(state_counts[state])
     
-    if gillespie:
-        plt.xlabel('Time')
-    else:
-        plt.xlabel('MC_Step')
+    
+    plt.xlabel('Time' if gillespie else 'MC_Step')
     plt.ylabel('# Nodes')
-    plt.title('State Evolution in IoT Network(SIR Model)')
     plt.legend()
     plt.tight_layout()
     plt.show()
