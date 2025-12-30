@@ -34,7 +34,7 @@ def plot_infected_curve(model:object, gillespie = True):
     plt.grid(True)
     plt.show()
 
-def plot_bars(model= None, snapshots = None, time = None , steps=1, state_colors= None,gillespie= True):
+def plot_bars(model= None, snapshots = None, time = None , stride=1, state_colors= None,gillespie= True):
     """
     Plot a stacked bar chart showing the temporal evolution of node states.
 
@@ -49,8 +49,8 @@ def plot_bars(model= None, snapshots = None, time = None , steps=1, state_colors
         List of node-state snapshots (used if model is None).
     time : list, optional
         Time points corresponding to snapshots (used if model is None).
-    steps : int, optional
-        Subsampling interval applied to snapshots and time, by default 1.
+    stride : int, optional
+        Subsampling step applied to snapshots and time, by default 1.
     state_colors : dict, optional
         Mapping from states to colors. Keys define which states are plotted.
         If None, a default SIR color mapping is used.
@@ -63,7 +63,7 @@ def plot_bars(model= None, snapshots = None, time = None , steps=1, state_colors
         model = model,
         snapshots= snapshots,
         time = time,
-        steps=steps,
+        stride=stride,
         state_colors=state_colors
     )
         
@@ -87,7 +87,7 @@ def plot_bars(model= None, snapshots = None, time = None , steps=1, state_colors
     plt.tight_layout()
     plt.show()
 
-def plot_network_evolution(model, network, steps):
+def plot_network_evolution(network,model=None,snapshots=None,time=None,stride =  1, state_colors=None):
     """
     Generate a sequence of interactive Plotly figures showing the evolution 
     of node states in the network across time. Each frame represents a snapshot 
@@ -95,23 +95,38 @@ def plot_network_evolution(model, network, steps):
 
     Parameters
     ----------
-    model : object
-        model object containing:
-        - network_history : list   of lists with states ('S', 'I', 'R') for each node.
-        - time : list of event times or discrete steps.
     network : networkx.Graph
-        The underlying network whose structure (nodes and edges) will be plotted.
-    steps : int 
-        Number of time steps to display. Must not exceed the length of 
-        `model.network_history`.
+        Network whose structure will be visualized.
+    model : object, optional
+        Model object containing:
+        - network_history
+        - time
+    snapshots : list of lists, optional
+        List of node-state snapshots (used if model is None).
+    time : list, optional
+        Time points corresponding to snapshots.
+    stride : int, optional
+        Subsampling step applied to snapshots and time, by default 1.
+    state_colors : dict
+        Mapping from states to colors.
+        
     """
+
+    # --- Input validation ---
+    snapshots, time, state_colors = plots_input_validation(
+        model = model,
+        snapshots= snapshots,
+        time = time,
+        stride= stride,
+        state_colors=state_colors
+    )
      # Compute fixed layout once for visual consistency
     fixed_layout = nx.spring_layout(network)
 
     figures = []
-    for i in range(steps):
+    for i in range(len(time)):
         
-        state_colors = {'S': 'blue', 'I': 'red', 'R': 'green'}
+        
 
        # Node traces
         node_traces = go.Scatter(
@@ -120,11 +135,11 @@ def plot_network_evolution(model, network, steps):
             mode='markers',
             marker=dict(
                 size=10,
-                color=[state_colors[state] for state in model.network_history[i]],
+                color=[state_colors[state] for state in snapshots[i]],
                 line_width=0.5
             ),
             hoverinfo='text',
-            text=[f"Node {node}<br>Device status: {model.network_history[i][node]}" for node in network.nodes()]
+            text=[f"Node {node}<br>Device status: {snapshots[i][node]}" for node in network.nodes()]
         )
 
         # Edge traces
@@ -160,30 +175,43 @@ def plot_network_evolution(model, network, steps):
     for fig in figures:
         fig.show()
 
-def plot_animation(model:object, network:object)->None:
-    """Generate an interactive Plotly animation showing the evolution 
-    of node states in the network across time. Each frame represents a snapshot 
-    of the network at one time step.
+def plot_animation(network,model=None,snapshots=None,time=None,state_colors=None,title=None):
+    """
+    Generate an interactive Plotly animation showing the evolution
+    of node states in a network.
 
     Parameters
     ----------
-    model : object
-        model object containing:
-        - network_history : list of lists with states ('S', 'I', 'R') for each node.
-        - time : list of event times or discrete steps.
     network : networkx.Graph
-        The underlying network whose structure (nodes and edges) will be plotted.
+        Network whose structure will be visualized.
+    model : object, optional
+        Model object containing:
+        - network_history
+        - time
+    snapshots : list of lists, optional
+        List of node-state snapshots (used if model is None).
+    time : list, optional
+        Time points corresponding to snapshots.
+    state_colors : dict
+        Mapping from states to colors.
+    title : str, optional
+        Title of the animation.
     """
 
-    
-    fixed_layout = nx.spring_layout(network, seed=42)
+    # --- Input validation ---
+    snapshots, time, state_colors = plots_input_validation(
+        model = model,
+        snapshots= snapshots,
+        time = time,
+        stride=1,
+        state_colors=state_colors
+    )
 
-   
-    state_colors = {'S': 'blue', 'I': 'red', 'R': 'green'}
+    fixed_layout = nx.spring_layout(network, seed=42)
 
     
     frames = []
-    for i, snapshot in enumerate(model.network_history):
+    for i, snapshot in enumerate(snapshots):
         node_traces = go.Scatter(
             x=[fixed_layout[n][0] for n in network.nodes()],
             y=[fixed_layout[n][1] for n in network.nodes()],
@@ -211,7 +239,7 @@ def plot_animation(model:object, network:object)->None:
     fig = go.Figure(
         data=frames[0].data,
         layout=go.Layout(
-        title=f"Stochastic-Network SIR — β = {model.beta}, γ = {model.gamma}, nI(t0)= {model.num_initial_infected}",
+        title=title if title is not None else "Stochastic network dynamics",
             updatemenus=[dict(
                 type='buttons',
                 showactive=False,

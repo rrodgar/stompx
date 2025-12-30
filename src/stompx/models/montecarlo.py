@@ -22,13 +22,6 @@ class Montecarlo_SIR_Network():
             * 'degree' : nodes with highest degree
             * 'eigenvector : nodes with highest eigenvector centrality
         """
-        #--------------------------------
-        # * G: Grafo o red donde propagar la enfermedad. Objeto de NetworkX
-        # * beta: Tasa de infección
-        # * gamma: Tasa de recuperacion
-        # * h : umbral vecinos
-        # * alfa: Pendiente funcion logistica
-        #--------------------------------
         self.G = G
         self.gamma = gamma
         self.num_initial_infected = num_initial_infected

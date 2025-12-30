@@ -1,4 +1,4 @@
-def plots_input_validation(model = None, snapshots = None, time = None, steps = 1, state_colors = None):
+def plots_input_validation(model = None, snapshots = None, time = None, stride = 1, state_colors = None):
     """
     Validate inputs for plotting functions.
 
@@ -12,7 +12,7 @@ def plots_input_validation(model = None, snapshots = None, time = None, steps = 
         List of node-state snapshots (used if model is None).
     time : list, optional
         Time points corresponding to snapshots.
-    steps : int, optional
+    stride : int, optional
         Subsampling interval, by default 1
     state_colors : dict
         Mapping from states to colors.
@@ -31,15 +31,15 @@ def plots_input_validation(model = None, snapshots = None, time = None, steps = 
 
     # --- Input validation ---
     if model is not None:
-        snapshots = model.network_history[::steps]
-        time = model.time[::steps]
+        snapshots = model.network_history[::stride]
+        time = model.time[::stride]
     else:
         if snapshots is None or time is None:
             raise ValueError(
                 "Either a model must be provided, or both snapshots and time must be specified."
             )
-        snapshots = snapshots[::steps]
-        time = time[::steps]
+        snapshots = snapshots[::stride]
+        time = time[::stride]
     if state_colors is None:
         state_colors = {'S': 'blue', 'I': 'red', 'R': 'green'}
     
