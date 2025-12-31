@@ -287,6 +287,11 @@ def plot_hist_I_max(model,n_sim=100, steps = 50, tmax = 100 ,gillespie = True):
     gillespie : bool, optional
         If True, uses Gillespie SSA time; otherwise uses discrete steps, by default True.
     """
+
+    #Input validation
+    if model is None:
+        raise ValueError("A model must be provided")
+    
     sum_tf = 0
     I_max_list = []
     extinction_count = 0
@@ -330,7 +335,7 @@ def plot_hist_tf(model, n_sim=100, steps=50, tmax=100, gillespie=True):
     ----------
     model : object
         Model object containing:
-        - network_history : list of lists with states ('S', 'I', 'R') for each node.
+        - network_history : list of lists with states ('S', 'I', 'R',...) for each node.
         - time : list of event times or discrete steps.
     n_sim : int, optional
         Number of simulations to run, by default 100.
@@ -341,6 +346,10 @@ def plot_hist_tf(model, n_sim=100, steps=50, tmax=100, gillespie=True):
     gillespie : bool, optional
         If True, uses Gillespie SSA time; otherwise uses discrete steps, by default True.
     """
+    #Input validation
+    if model is None:
+        raise ValueError("A model must be provided")
+    
     tf_vec = []
 
     for i in range(n_sim):
