@@ -5,16 +5,17 @@ import random
 
 class Montecarlo_SIR_Network():
     def __init__(self,G,gamma, h,num_initial_infected, initial_inf_method = 'aleatorio'):
-        """_summary_
+        """
+        Stochastic SIR model on a static network using a discrete Montecarlo scheme.
 
         Parameters
         ----------
-        G : _type_
-            _description_
-        gamma : _type_
-            _description_
-        h : _type_
-            _description_
+        G : networkx.Graph
+            Network where the epidemic spreads (undirected graph)
+        gamma : float
+            Recovery rate, probability that a node becomes recovered from infected state, values range between [0,1]
+        h : int
+            Infection threshold parameter. If infected neighbors are higher probability of infection increases.
         num_initial_infected : int
             Initial numbers of infected devices (nodes)
         initial_inf_method : Strategy to select the initial infected nodes:
@@ -47,9 +48,7 @@ class Montecarlo_SIR_Network():
             for node in random.sample(list(self.G.nodes), k= self.num_initial_infected):
                 self.G.nodes[node]['state'] ='I'
     def new_state(self, node, states_old):
-        # Recibe un node y calculamos su nuevo state
-           
-        
+    
         state = states_old[node]
         # Vamos a generar un num aleatorio para las probabilidades
         # Comprobamos el state 
@@ -58,8 +57,8 @@ class Montecarlo_SIR_Network():
             return 'R' if (r < self.gamma) else 'I'
         elif state =='S':
             #Calculamos los vecinos infectados
-            vecinos_inf = [i for i in self.G.neighbors(node) if states_old[i]=='I']
-            kv = len(vecinos_inf)
+            inf_neighbors = [i for i in self.G.neighbors(node) if states_old[i]=='I']
+            kv = len(inf_neighbors)
             # Calculamos la prob de transición
             if kv == 0:
                 p = 0
@@ -87,3 +86,48 @@ class Montecarlo_SIR_Network():
             # Calculamos el nuevo state 
             for node in self.G.nodes():
                 self.G.nodes[node]['state'] = self.new_state(node,states_old)
+
+class Montecarlo_SIR_Network_TOM(Montecarlo_SIR_Network):
+    def TOM(self,node_i:int,node_j:int)->float:
+        """ Compute the topological overlap measure for two nodes
+
+        Parameters
+        ----------
+        node_i : int
+            Node number 'i' in the networkx graph G
+        node_j : int
+            Node number 'j' in the networkx graph G
+
+        Returns
+        -------
+        float
+            TOM value for nodes i and j
+        """
+        
+        neighbors_i = set(self.G.neighbors(node_i))
+        neighbors_j = set(self.G.neighbors(node_j))
+        l_ij = len(neighbors_i & neighbors_j)
+        k_i = self.G.degree(node_i)
+        k_j = self.G.degree(node_j)
+        tom = (l_ij + 1) / (min(k_i, k_j))
+        return tom
+    def new_state(self, node, states_old):
+        state = states_old[node]
+        r = np.random.rand()
+        if state =='I':
+            return 'R' if (r < self.gamma) else 'I'
+        elif state =='S':
+            #Calculamos los vecinos infectados
+            inf_neighbors = [i for i in self.G.neighbors(node) if states_old[i]=='I']
+            kv = len(inf_neighbors)
+            # Calculamos la prob de transición
+            if kv == 0:
+                p = 0
+            else:
+                for n in inf_neighbors:
+                    kv += self.TOM(node,n)
+                p = 1/(1 + np.exp(self.h - self.beta * kv ))            
+            return 'I' if (r < p) else 'S'
+        
+        else:
+            return 'R' 
