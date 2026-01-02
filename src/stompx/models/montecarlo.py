@@ -38,7 +38,6 @@ class Montecarlo_SIR_Network():
         if self.initial_inf_method == 'eigenvector':
             centralidad = nx.eigenvector_centrality_numpy(self.G)
             node_inicio = max(centralidad, key=centralidad.get)
-            # print('el node central',node_max_closeness)
             self.G.nodes[node_inicio]['state'] = 'I'
         elif self.initial_inf_method == 'degree':
             centralidad = nx.degree_centrality(self.G)
@@ -50,40 +49,32 @@ class Montecarlo_SIR_Network():
     def new_state(self, node, states_old):
     
         state = states_old[node]
-        # Vamos a generar un num aleatorio para las probabilidades
-        # Comprobamos el state 
         r = np.random.rand()
         if state =='I':
             return 'R' if (r < self.gamma) else 'I'
         elif state =='S':
-            #Calculamos los vecinos infectados
+            
             inf_neighbors = [i for i in self.G.neighbors(node) if states_old[i]=='I']
             kv = len(inf_neighbors)
-            # Calculamos la prob de transición
             if kv == 0:
                 p = 0
             else:
-                p = 1/(1 + np.exp(self.h - self.beta * kv ))            
+                p = 1/(1 + np.exp(self.h  - kv ))            
             return 'I' if (r < p) else 'S'
         
         else:
             return 'R' 
     def run_simulation(self, steps):
-        # Ejecutamos la simulación completa
-        #Inicializamos la red
+       
         self.initialize_network()
-
-        # Simular un paso monteCarlo pasando por cada node y ver si se actualiza su state.
         self.network_history = []
         self.time = np.arange(steps)
         
         for t in range(steps):
 
-            #Guardamos el state viejo de los nodes
+            
             states_old = {node: self.G.nodes[node]['state'] for node in self.G.nodes() }
             self.network_history.append([self.G.nodes[n]['state'] for n in self.G.nodes() ]) 
-
-            # Calculamos el nuevo state 
             for node in self.G.nodes():
                 self.G.nodes[node]['state'] = self.new_state(node,states_old)
 
@@ -117,16 +108,14 @@ class Montecarlo_SIR_Network_TOM(Montecarlo_SIR_Network):
         if state =='I':
             return 'R' if (r < self.gamma) else 'I'
         elif state =='S':
-            #Calculamos los vecinos infectados
             inf_neighbors = [i for i in self.G.neighbors(node) if states_old[i]=='I']
             kv = len(inf_neighbors)
-            # Calculamos la prob de transición
             if kv == 0:
                 p = 0
             else:
                 for n in inf_neighbors:
                     kv += self.TOM(node,n)
-                p = 1/(1 + np.exp(self.h - self.beta * kv ))            
+                p = 1/(1 + np.exp(self.h -  kv ))            
             return 'I' if (r < p) else 'S'
         
         else:
