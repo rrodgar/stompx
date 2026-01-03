@@ -1,4 +1,6 @@
 import pandas as pd
+import numpy as np
+import networkx as nx
 
 def resumen_red(G):
     degs = [d for _, d in G.degree()]

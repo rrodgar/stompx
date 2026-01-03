@@ -4,6 +4,7 @@ import networkx as nx
 import plotly.graph_objects as go
 import numpy as np
 from ._helpers import plots_input_validation
+from ..metrics.metrics import mean_infected_gillespie
 
 def plot_infected_curve(model:object, gillespie = True):
     """
@@ -276,7 +277,7 @@ def plot_hist_I_max(model,n_sim=100, steps = 50, tmax = 100 ,gillespie = True):
     ----------
      model : object
         model object containing:
-        - network_history : list of lists with states ('S', 'I', 'R') for each node.
+        - network_history : list of lists with states ('S', 'I', 'R'...) for each node.
         - time : list of event times or discrete steps.
     n_sim : int, optional
         Number of simulations to run, by default 100.
