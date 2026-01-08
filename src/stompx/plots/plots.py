@@ -4,7 +4,7 @@ import networkx as nx
 import plotly.graph_objects as go
 import numpy as np
 from ._helpers import plots_input_validation
-from ..metrics.metrics import mean_infected_gillespie
+from ..metrics.metrics import mean_infected_gillespie , compute_max_statistics
 
 def plot_infected_curve(model:object, gillespie = True):
     """
@@ -270,63 +270,63 @@ def plot_animation(network,model=None,snapshots=None,time=None,state_colors=None
 
     #fig.write_html("animacion_infeccion.html")
     fig.show()
-def plot_hist_I_max(model,n_sim=100, steps = 50, tmax = 100 ,gillespie = True):
-    """_summary_
+def plot_hist_I_max(
+    model,
+    n_sim=100,
+    steps=50,
+    tmax=100,
+    gillespie=True,
+    title=None
+):
+    """
+    Plot the histogram of the maximum number of infected nodes (I_max)
+    obtained from repeated stochastic simulations.
 
     Parameters
     ----------
-     model : object
-        model object containing:
-        - network_history : list of lists with states ('S', 'I', 'R'...) for each node.
+    model : object
+        Stochastic model providing:
+        - network_history : list of lists with node states
         - time : list of event times or discrete steps.
     n_sim : int, optional
         Number of simulations to run, by default 100.
     steps : int, optional
-        Number of discrete Monte Carlo steps (if not using Gillespie), by default 50.
-    tmax : int, optional
-        Maximum time for Gillespie simulation, by default 100.
+        Number of Monte Carlo steps (if not using Gillespie), by default 50.
+    tmax : float, optional
+        Maximum simulation time for Gillespie simulations, by default 100.
     gillespie : bool, optional
-        If True, uses Gillespie SSA time; otherwise uses discrete steps, by default True.
+        If True, uses Gillespie SSA time; otherwise uses discrete steps.
+    title : str, optional
+        Custom title for the plot.
     """
 
-    #Input validation
     if model is None:
-        raise ValueError("A model must be provided")
-    
-    sum_tf = 0
-    I_max_list = []
-    extinction_count = 0
-    #iteraciones
-    for i in range(n_sim):
-        if gillespie:
-            model.run_simulation(tmax, verbose = False )
-        else:
-            model.run_simulation(steps)
-        I = [state.count('I') for state in model.network_history]
-        I_max = max(I)
-        I_max_list.append(I_max)
-        tf = model.time[np.where(np.array(I) > 0)[0][-1]] 
-        sum_tf += tf
-        if I_max < 10:
-            extinction_count +=1
-        
-    I_max_list = np.array(I_max_list)
-    mean_I_max = I_max_list.mean()
-    std_I_max = I_max_list.std()
-    mean_duration = sum_tf/n_sim
-    # Histograma
-    # plt.hist(I_max_list, bins=30, alpha=0.7, color='red', edgecolor = 'black')
-    plt.hist(I_max_list, bins=range(min(I_max_list), max(I_max_list)+1), color = 'skyblue', edgecolor='black')
-    plt.xlabel('Maximum number of infected nodes (I_max)')
-    plt.ylabel('Frequency')
-    plt.title(f'Distribution of I_max for {model}')
+        raise ValueError("A model must be provided.")
+
+    res_dic = compute_max_statistics(
+        model=model,
+        n_sim=n_sim,
+        gillespie=gillespie,
+        tmax=tmax,
+        steps=steps,
+    )
+
+    I_max_list = res_dic["I_max_values"]
+
+    plt.hist(
+        I_max_list,
+        bins=range(min(I_max_list), max(I_max_list) + 1),
+        color='skyblue',
+        edgecolor='black'
+    )
+
+    plt.xlabel(r"Maximum number of infected nodes ($I_{\max}$)")
+    plt.ylabel("Frequency")
+    plt.title(title if title is not None else "Distribution of $I_{max}$")
     plt.grid(True)
     plt.tight_layout()
     plt.show()
 
-    print(f"Mean I_max: {mean_I_max:.2f} ± {std_I_max:.2f}")
-    print(f"Mean duration until last infection: {mean_duration:.2f}")
-    print(f"Number of simulations that went extinct early: {extinction_count}")
 
 def plot_hist_tf(model, n_sim=100, steps=50, tmax=100, gillespie=True):
     """
@@ -351,27 +351,16 @@ def plot_hist_tf(model, n_sim=100, steps=50, tmax=100, gillespie=True):
     if model is None:
         raise ValueError("A model must be provided")
     
-    tf_vec = []
 
-    for i in range(n_sim):
-        if gillespie:
-            model.run_simulation(tmax, verbose=False)
-        else:
-            model.run_simulation(steps)
+    res_dic = compute_max_statistics(
+        model=model,
+        n_sim=n_sim,
+        gillespie=gillespie,
+        tmax=tmax,
+        steps=steps,
+    )
 
-        
-        I = [state.count('I') for state in model.network_history]
-
-        # Only consider simulations where infection occurred.
-        if any(I):
-            tf = model.time[np.where(np.array(I) > 0)[0][-1]]
-            tf_vec.append(tf)
-
-    tf_vec = np.array(tf_vec)
-    mean_duration = tf_vec.mean()
-    std_tf = tf_vec.std()
-
-    
+    tf_vec = res_dic["tf_values"]
     plt.hist(tf_vec, bins=30, color = 'skyblue', edgecolor='black')
     plt.xlabel('Time until outbreak extinction ($t_{fin}$)')
     plt.ylabel('Frequency')
@@ -379,6 +368,32 @@ def plot_hist_tf(model, n_sim=100, steps=50, tmax=100, gillespie=True):
     plt.tight_layout()
     plt.show()
 
-    print(f"Mean outbreak duration: {mean_duration:.2f} ± {std_tf:.2f}")
-
-    #return tf_vec
+def plot_Imax_comparative(
+        models,
+        tags,
+        title,
+        n_sim = 100,
+        steps = 50,
+        tmax= 100,
+        gillespie= True,
+):
+    plt.figure(figsize=(8,5))
+    colors = ["#1f77b4", "#ff7f0e"]
+    for model,tag,color in zip(models,tags,colors):
+        res_dic = compute_max_statistics(
+            model=model,
+            n_sim=n_sim,
+            tmax=tmax,
+            steps= steps,
+            gillespie= gillespie
+        )
+        I_max_vec = res_dic["I_max_values"]
+        plt.hist(I_max_vec, bins=range(min(I_max_vec), max(I_max_vec)+1), alpha=0.5, color=color,
+                 label=f"{tag}",
+                 edgecolor="black")
+        plt.xlabel(" ($I_{max}$)")
+        plt.title(title if title is not None else "Comparative outbreak size distributions")
+        plt.legend()
+        plt.grid(True)
+        plt.tight_layout()
+        plt.show()

@@ -144,3 +144,90 @@ def mean_infected_gillespie(model, n_sim=100, t_max=50, n_points=100):
     I_std = np.sqrt(infected_sum2 / n_sim - I_mean**2)
 
     return uniform_times, I_mean, I_std
+
+def compute_max_statistics(
+    model,
+    n_sim=100,
+    tmax=100,
+    steps=50,
+    target_state='I',
+    extinction_threshold=1,
+    gillespie=True
+):
+    """
+    Compute outbreak size statistics from repeated stochastic simulations.
+
+    Parameters
+    ----------
+    model : object, optional
+        Model object containing:
+        - network_history
+        - time
+    n_sim : int, optional
+        Number of independent simulations.
+    tmax : float, optional
+        Maximum simulation time (Gillespie).
+    steps : int, optional
+        Number of Monte Carlo steps (discrete-time).
+    target_state : str, optional
+        State considered to compute metrics (by default 'I' as infected).
+    extinction_threshold : int, optional
+        Threshold on I_max to classify early extinction.
+    gillespie : bool, optional
+        If True, uses Gillespie SSA time; otherwise uses discrete steps, by default True.
+
+    Returns
+    -------
+    dict
+        Dictionary containing outbreak statistics.
+            * I_max_values: numpy.ndarray
+                Maximum number of infected nodes observed in each simulation.
+            * I_max_mean : float
+                Mean value of the maximum number of infected nodes.
+            * I_max_std : float
+                Standard deviation of the maximum number of infected nodes.
+            * extinction_prob : float
+                Fraction of simulations classified as early extinctions.
+            * mean_extinction_time : float
+                Mean time until extinction or end of the outbreak.
+    """
+
+    I_max_values = []
+    tf_values = []
+    extinction_count = 0
+    # tf_sum = 0.0
+
+    for _ in range(n_sim):
+
+        if gillespie:
+            model.run_simulation(tmax, verbose=False)
+        else:
+            model.run_simulation(steps)
+
+        I = [snap.count(target_state) for snap in model.network_history]
+        I_max = max(I)
+        I_max_values.append(I_max)
+
+        if I_max <= extinction_threshold:
+            extinction_count += 1
+
+        nonzero = np.where(np.array(I) > 0)[0]
+        if len(nonzero) > 0:
+            tf_values.append(model.time[nonzero[-1]])
+            # tf_sum += model.time[nonzero[-1]]
+            # tf_sum2 += (model.time[nonzero[-1]])**2
+
+    I_max_values = np.array(I_max_values)
+    tf_values = np.array(tf_values)
+    # tf_mean = tf_sum / n_sim
+    # tf_std =  np.sqrt(tf_sum2 / n_sim - tf_mean**2)
+
+    return {
+        "I_max_values": I_max_values,
+        "I_max_mean": I_max_values.mean(),
+        "I_max_std": I_max_values.std(),
+        "extinction_prob": extinction_count / n_sim,
+        "extinction_time_values": tf_values,
+        "mean_extinction_time": tf_values.mean(),
+        "std_extincion_time": tf_values.std()
+    }
