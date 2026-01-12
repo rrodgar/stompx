@@ -391,9 +391,9 @@ def plot_Imax_comparative(
         plt.hist(I_max_vec, bins=range(min(I_max_vec), max(I_max_vec)+1), alpha=0.5, color=color,
                  label=f"{tag}",
                  edgecolor="black")
-        plt.xlabel(" ($I_{max}$)")
-        plt.title(title if title is not None else "Comparative outbreak size distributions")
-        plt.legend()
-        plt.grid(True)
-        plt.tight_layout()
-        plt.show()
+    plt.xlabel(" ($I_{max}$)")
+    plt.title(title if title is not None else "Comparative outbreak size distributions")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()

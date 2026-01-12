@@ -13,4 +13,7 @@ __all__ = (
     "I_max_mean",
     "plot_animation",
     "plot_evolution_network",
+    "plot_hist_I_max",
+    "plot_hist_tf",
+    "plot_Imax_comparative"
 )
