@@ -231,3 +231,53 @@ def compute_max_statistics(
         "mean_extinction_time": tf_values.mean(),
         "std_extincion_time": tf_values.std()
     }
+
+def statistics_summary(
+    model,
+    n_sim=100,
+    gillespie=True,
+    tmax=100,
+    steps=50,
+    target_state='I',
+    extinction_threshold=1
+):
+    """
+    Print a concise summary of outbreak statistics from repeated stochastic simulations.
+
+    Parameters
+    ----------
+    model : object, optional
+        Model object containing:
+        - network_history
+        - time
+    n_sim : int, optional
+        Number of independent simulations.
+    tmax : float, optional
+        Maximum simulation time (Gillespie).
+    steps : int, optional
+        Number of Monte Carlo steps (discrete-time).
+    target_state : str, optional
+        State considered to compute metrics (by default 'I' as infected).
+    extinction_threshold : int, optional
+        Threshold on I_max to classify early extinction.
+    gillespie : bool, optional
+        If True, uses Gillespie SSA time; otherwise uses discrete steps, by default True.
+    """
+
+    stats = compute_max_statistics(
+        model=model,
+        n_sim=n_sim,
+        gillespie=gillespie,
+        tmax=tmax,
+        steps=steps,
+        target_state=target_state,
+        extinction_threshold=extinction_threshold
+    )
+
+    print("Outbreak statistics summary")
+    print('-----------------------------------')
+    print(f"Number of simulations      :", n_sim)
+    print(f"Mean I_max                 : {stats['I_max_mean']:.2f} ± {stats['I_max_std']:.2f}")
+    print(f"Extinction probability     : {stats['extinction_prob']:.3f}")
+    print(f"Mean extinction time       : {stats['mean_extinction_time']:.2f}")
+    print("-----------------------------------")

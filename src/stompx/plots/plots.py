@@ -360,7 +360,7 @@ def plot_hist_tf(model, n_sim=100, steps=50, tmax=100, gillespie=True):
         steps=steps,
     )
 
-    tf_vec = res_dic["tf_values"]
+    tf_vec = res_dic["extinction_time_values"]
     plt.hist(tf_vec, bins=30, color = 'skyblue', edgecolor='black')
     plt.xlabel('Time until outbreak extinction ($t_{fin}$)')
     plt.ylabel('Frequency')

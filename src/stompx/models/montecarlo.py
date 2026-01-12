@@ -116,7 +116,7 @@ class Montecarlo_SIR_Network_TOM(Montecarlo_SIR_Network):
                 for n in inf_neighbors:
                     kv += self.TOM(node,n)
                 p = 1/(1 + np.exp(self.h -  kv ))            
-            return 'I' if (r < p) else 'S'
+            return 'I' if (r < p) else 'S'  
         
         else:
             return 'R' 
