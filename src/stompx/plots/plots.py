@@ -176,7 +176,7 @@ def plot_network_evolution(network,model=None,snapshots=None,time=None,stride = 
     for fig in figures:
         fig.show()
 
-def plot_animation(network,model=None,snapshots=None,time=None,state_colors=None,title=None):
+def plot_animation(network,model=None,snapshots=None,time=None,state_colors=None,title=None, save_html= False):
     """
     Generate an interactive Plotly animation showing the evolution
     of node states in a network.
@@ -267,8 +267,8 @@ def plot_animation(network,model=None,snapshots=None,time=None,state_colors=None
         height=650,
         margin=dict(l=20, r=20, t=40, b=20)
     )
-
-    #fig.write_html("animacion_infeccion.html")
+    if save_html:
+        fig.write_html("infection_animation.html")
     fig.show()
 def plot_hist_I_max(
     model,
