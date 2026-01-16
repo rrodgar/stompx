@@ -7,7 +7,7 @@ name = "stompx"
 version = "0.0.1"
 description = "Stochastic  propagation on networks models and tools, with application to malware"
 authors = [
-    { name = "Rafael Rodríguez", email = "rafael.rodriguez@ubu.es }
+    { name = "Rafael Rodríguez", email = "rafael.rodriguez@ubu.es" }
 ]
 readme = "README.md"
 requires-python = ">=3.9"
