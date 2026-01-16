@@ -15,7 +15,7 @@ pip install -e .
 
 ## Examples
 
-![Stochastic network animation](figures/animation.gif)
+![Stochastic network animation](figures/animacion_gif.gif)
 
 
 A short usage example is provided in a Jupyter notebook.
