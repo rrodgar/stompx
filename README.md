@@ -9,9 +9,12 @@ epidemic modeling, information diffusion, and malware propagation in IoT network
 ## Installation
 
 The package can be installed locally from the GitHub repository:
-git clone https://github.com/<username>/stompx.git
+
+```bash
+git clone https://github.com/rrodgar/stompx.git
 cd stompx
-pip install -e .
+pip install -e.
+```
 
 ## Examples
 
