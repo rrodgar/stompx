@@ -377,6 +377,29 @@ def plot_Imax_comparative(
         tmax= 100,
         gillespie= True,
 ):
+    """
+    Plot a comparative histogram of outbreak sizes for multiple models.
+
+    Parameters
+    ----------
+    models : List of model objects containing:
+        - network_history : list of lists with states ('S', 'I', 'R',...) for each node.
+        - time : list of event times or discrete steps.
+    tags : sequence of str
+        Labels associated with each model, used in the plot legend.
+    title : str or None
+        Title of the figure. If None, a default title is used.
+    n_sim : int, optional
+        Number of independent simulations run for each model, by default 100.
+    steps : int, optional
+        Number of Monte Carlo steps for discrete-time simulations, by default 50.
+        Ignored if `gillespie` is True.
+    tmax : float, optional
+        Maximum simulation time for Gillespie simulations, by default 100.
+    gillespie : bool, optional
+        If True, simulations are run using Gillespie SSA time.
+        If False, discrete-time simulations are used.
+    """
     plt.figure(figsize=(8,5))
     colors = ["#1f77b4", "#ff7f0e"]
     for model,tag,color in zip(models,tags,colors):
