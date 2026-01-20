@@ -51,9 +51,29 @@ def network_summary(G:nx.Graph)->dict:
             "rho(A)": rho}
 
 # Convertir la simulación en un DataFrame
-def crear_dataset(modelo,estados):
-    datos = []
-    for i, estado_paso in enumerate(estados):
-        for nodo, estado in enumerate(estado_paso):
-            datos.append({'Time step': modelo.time[i], 'Node': nodo, 'Device status': estado})
-    return pd.DataFrame(datos)
+def crear_dataset(model,title,save_csv=False):
+    """
+    Convert the output of a single simulation into a tidy DataFrame.
+
+    Parameters
+    ----------
+    model : object
+        Model object exposing:
+        - network_history : list of node-state snapshots
+        - time : list of time points
+
+    Returns
+    -------
+    pandas.DataFrame
+        Long-format DataFrame with columns:
+        * 'time'
+        * 'node'
+        * 'state'
+    """
+    data = []
+    for i, snapshot in enumerate(model.network_history):
+        for node, state in enumerate(snapshot):
+            data.append({'Time step': model.time[i], 'Node': node, 'Device status': state})
+    df =  pd.DataFrame(data)
+    return df
+    
