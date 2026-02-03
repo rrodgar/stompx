@@ -9,7 +9,7 @@ __all__ = (
     "Montecarlo_SIR_Network",
     "Montecarlo_SIR_Network_TOM",
     "plot_infected_curve",
-    "crear_dataset",
+    "dataset_creation",
     "I_max_mean",
     "plot_animation",
     "plot_evolution_network",

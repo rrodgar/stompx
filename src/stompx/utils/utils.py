@@ -51,7 +51,7 @@ def network_summary(G:nx.Graph)->dict:
             "rho(A)": rho}
 
 # Convertir la simulación en un DataFrame
-def crear_dataset(model,title,save_csv=False):
+def dataset_creation(model,title,save_csv=False):
     """
     Convert the output of a single simulation into a tidy DataFrame.
 
